@@ -31,7 +31,7 @@
 
 .app-header h1 {
   max-width: 8ch;
-  font-size: clamp(2.55rem, 15vw, 5.9rem);
+  font-size: clamp(2rem, 10vw, 4.2rem);
 }
 
 .deck-picker {
@@ -45,6 +45,7 @@
 
 .deck-picker select,
 input,
+select,
 textarea {
   width: 100%;
   box-sizing: border-box;
@@ -67,6 +68,7 @@ textarea {
 
 .deck-picker select:focus,
 input:focus,
+select:focus,
 textarea:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 4px var(--accent-soft);
@@ -92,7 +94,7 @@ textarea:focus {
 .stats-grid strong {
   color: var(--ink);
   font-family: var(--display);
-  font-size: 2rem;
+  font-size: 1.55rem;
   line-height: 1;
 }
 
@@ -198,8 +200,8 @@ button:disabled {
 .flashcard {
   display: grid;
   align-content: space-between;
-  min-height: 340px;
-  padding: 24px;
+  min-height: 300px;
+  padding: 20px;
   overflow: hidden;
   border: 1px solid rgba(34, 197, 94, 0.32);
   border-radius: 8px;
@@ -209,12 +211,14 @@ button:disabled {
 }
 
 .flashcard h2 {
-  margin: 18px 0;
+  margin: 14px 0;
   color: var(--ink);
   font-family: var(--display);
-  font-size: clamp(2.6rem, 16vw, 5.4rem);
-  line-height: 0.98;
-  overflow-wrap: anywhere;
+  font-size: clamp(1.55rem, 7vw, 3rem);
+  line-height: 1.12;
+  hyphens: auto;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 .card-label,
@@ -223,9 +227,54 @@ button:disabled {
   color: var(--muted);
 }
 
+.card-topline,
+.word-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.card-topline {
+  justify-content: space-between;
+}
+
+.article-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.article-der {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.article-die {
+  background: #fce7f3;
+  color: #be185d;
+}
+
+.article-das {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.article-plural {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
 .card-label {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -245,8 +294,10 @@ button:disabled {
 
 .answer strong {
   color: var(--ink);
-  font-size: clamp(1.45rem, 7vw, 2.2rem);
-  line-height: 1.1;
+  font-size: clamp(1.08rem, 4.8vw, 1.65rem);
+  line-height: 1.18;
+  hyphens: auto;
+  overflow-wrap: break-word;
 }
 
 .answer span,
@@ -319,7 +370,7 @@ button:disabled {
 
 .section-heading h2,
 .empty-state h2 {
-  font-size: clamp(1.7rem, 8vw, 3rem);
+  font-size: clamp(1.35rem, 5vw, 2.2rem);
 }
 
 .editor-panel {
@@ -336,6 +387,7 @@ label {
 }
 
 input,
+select,
 textarea {
   padding: 13px 14px;
 }
@@ -383,7 +435,8 @@ textarea {
 .word-row strong,
 .deck-row strong {
   color: var(--ink);
-  font-size: 1.08rem;
+  font-size: 0.98rem;
+  overflow-wrap: break-word;
 }
 
 .word-row span,
@@ -476,8 +529,8 @@ textarea {
   }
 
   .flashcard {
-    min-height: 390px;
-    padding: 34px;
+    min-height: 340px;
+    padding: 28px;
   }
 
   .review-actions {

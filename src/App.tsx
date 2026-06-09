@@ -10,6 +10,7 @@ const SEED_CREATED_AT = new Date('2026-01-01T00:00:00.000Z').getTime()
 
 type View = 'study' | 'words' | 'lists'
 type ReviewGrade = 'again' | 'hard' | 'good' | 'easy'
+type ArticleTag = 'der' | 'die' | 'das' | 'plural'
 
 type Flashcard = {
   id: string
@@ -23,6 +24,7 @@ type Flashcard = {
   ease: number
   repetitions: number
   lapses: number
+  article?: ArticleTag
   lastReviewedAt?: number
 }
 
@@ -39,6 +41,7 @@ type CardForm = {
   german: string
   translation: string
   note: string
+  article: ArticleTag | ''
 }
 
 type DeckForm = {
@@ -97,12 +100,43 @@ function createId(prefix: string) {
   return `${prefix}-${globalThis.crypto?.randomUUID?.() ?? fallback}`
 }
 
+function detectArticle(german: string): ArticleTag | undefined {
+  const normalized = german.trim().toLowerCase()
+
+  if (normalized.startsWith('der ')) {
+    return 'der'
+  }
+
+  if (normalized.startsWith('die ')) {
+    return 'die'
+  }
+
+  if (normalized.startsWith('das ')) {
+    return 'das'
+  }
+
+  return undefined
+}
+
+function getArticle(card: Flashcard): ArticleTag | undefined {
+  return card.article ?? detectArticle(card.german)
+}
+
+function getArticleLabel(article: ArticleTag | undefined) {
+  if (!article) {
+    return ''
+  }
+
+  return article === 'plural' ? 'Plural' : article
+}
+
 function createSeedCard(id: string, german: string, translation: string, note = ''): Flashcard {
   return {
     id,
     german,
     translation,
     note,
+    article: detectArticle(german),
     createdAt: SEED_CREATED_AT,
     updatedAt: SEED_CREATED_AT,
     dueAt: SEED_CREATED_AT,
@@ -134,6 +168,7 @@ function createCard(german = '', translation = '', note = ''): Flashcard {
     german,
     translation,
     note,
+    article: detectArticle(german),
     createdAt: now,
     updatedAt: now,
     dueAt: now,
@@ -272,7 +307,12 @@ function App() {
   const [editingDeckId, setEditingDeckId] = useState<string | null>(null)
   const [editingCardId, setEditingCardId] = useState<string | null>(null)
   const [deckForm, setDeckForm] = useState<DeckForm>({ title: '', description: '' })
-  const [cardForm, setCardForm] = useState<CardForm>({ german: '', translation: '', note: '' })
+  const [cardForm, setCardForm] = useState<CardForm>({
+    german: '',
+    translation: '',
+    note: '',
+    article: '',
+  })
   const [now, setNow] = useState(() => Date.now())
   const [studySeed, setStudySeed] = useState(() => createId('study'))
 
@@ -380,12 +420,17 @@ function App() {
 
   function resetCardForm() {
     setEditingCardId(null)
-    setCardForm({ german: '', translation: '', note: '' })
+    setCardForm({ german: '', translation: '', note: '', article: '' })
   }
 
   function startCardEdit(card: Flashcard) {
     setEditingCardId(card.id)
-    setCardForm({ german: card.german, translation: card.translation, note: card.note })
+    setCardForm({
+      german: card.german,
+      translation: card.translation,
+      note: card.note,
+      article: getArticle(card) ?? '',
+    })
     setView('words')
   }
 
@@ -398,6 +443,8 @@ function App() {
       return
     }
 
+    const selectedArticle = cardForm.article || detectArticle(german)
+
     setDecks((currentDecks) =>
       currentDecks.map((deck) => {
         if (deck.id !== activeDeck.id) {
@@ -407,6 +454,7 @@ function App() {
         const nextCard = {
           ...createCard(german, translation, cardForm.note.trim()),
           id: editingCardId ?? createId('card'),
+          article: selectedArticle,
           createdAt:
             deck.cards.find((card) => card.id === editingCardId)?.createdAt ?? Date.now(),
         }
@@ -422,6 +470,7 @@ function App() {
                       german,
                       translation,
                       note: cardForm.note.trim(),
+                      article: selectedArticle,
                       updatedAt: Date.now(),
                     }
                   : card,
@@ -568,7 +617,14 @@ function App() {
               </button>
 
               <article className={`flashcard ${isAnswerVisible ? 'is-revealed' : ''}`}>
-                <p className="card-label">Alemao</p>
+                <div className="card-topline">
+                  <p className="card-label">Alemao</p>
+                  {getArticle(currentCard) && (
+                    <span className={`article-badge article-${getArticle(currentCard)}`}>
+                      {getArticleLabel(getArticle(currentCard))}
+                    </span>
+                  )}
+                </div>
                 <h2>{currentCard.german}</h2>
                 {isAnswerVisible ? (
                   <div className="answer">
@@ -644,6 +700,24 @@ function App() {
               />
             </label>
             <label>
+              Artigo ou tipo
+              <select
+                value={cardForm.article}
+                onChange={(event) =>
+                  setCardForm((form) => ({
+                    ...form,
+                    article: event.target.value as CardForm['article'],
+                  }))
+                }
+              >
+                <option value="">Detectar automaticamente</option>
+                <option value="der">der - azul</option>
+                <option value="die">die - rosa</option>
+                <option value="das">das - verde</option>
+                <option value="plural">Plural - laranja</option>
+              </select>
+            </label>
+            <label>
               Traducao
               <input
                 value={cardForm.translation}
@@ -686,7 +760,14 @@ function App() {
               activeDeck.cards.map((card) => (
                 <article key={card.id} className="word-row">
                   <div>
-                    <strong>{card.german}</strong>
+                    <div className="word-title">
+                      {getArticle(card) && (
+                        <span className={`article-badge article-${getArticle(card)}`}>
+                          {getArticleLabel(getArticle(card))}
+                        </span>
+                      )}
+                      <strong>{card.german}</strong>
+                    </div>
                     <span>{card.translation}</span>
                     {card.note && <small>{card.note}</small>}
                   </div>
