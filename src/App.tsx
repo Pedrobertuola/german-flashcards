@@ -53,7 +53,7 @@ const initialDecks: Deck[] = [
   createGoetheDeck(),
   {
     id: 'deck-a1-essentials',
-    title: 'Alemao A1 essencial',
+    title: 'Alemão A1 essencial',
     description: 'Palavras curtas para as primeiras conversas.',
     createdAt: Date.now(),
     updatedAt: Date.now(),
@@ -74,7 +74,7 @@ const initialDecks: Deck[] = [
     updatedAt: Date.now(),
     cards: [
       createCard('Guten Morgen', 'bom dia', 'Guten Morgen, wie geht es dir?'),
-      createCard('Ich verstehe nicht', 'eu nao entendo', 'Entschuldigung, ich verstehe nicht.'),
+      createCard('Ich verstehe nicht', 'eu não entendo', 'Entschuldigung, ich verstehe nicht.'),
       createCard('Wie viel kostet das?', 'quanto custa isso?', 'Wie viel kostet das Brot?'),
       createCard('Bis spaeter', 'ate mais tarde', 'Bis spaeter im Kurs.'),
     ],
@@ -83,9 +83,9 @@ const initialDecks: Deck[] = [
 
 const reviewLabels: Record<ReviewGrade, string> = {
   again: 'Errei',
-  hard: 'Dificil',
+  hard: 'Difícil',
   good: 'Bom',
-  easy: 'Facil',
+  easy: 'Fácil',
 }
 
 const reviewHints: Record<ReviewGrade, string> = {
@@ -130,6 +130,34 @@ function getArticleLabel(article: ArticleTag | undefined) {
   return article === 'plural' ? 'Plural' : article
 }
 
+function getWordParts(german: string) {
+  const match = german.trim().match(/^(der|die|das)\s+(.+)$/i)
+
+  if (!match) {
+    return { articleText: '', rest: german }
+  }
+
+  return { articleText: match[1].toLowerCase(), rest: match[2] }
+}
+
+function GermanWord({ card, compact = false }: { card: Flashcard; compact?: boolean }) {
+  const article = getArticle(card)
+  const parts = getWordParts(card.german)
+
+  if (!parts.articleText) {
+    return <>{card.german}</>
+  }
+
+  return (
+    <span className={`german-word ${compact ? 'compact' : ''}`}>
+      <span className={`article-token article-${article ?? parts.articleText}`}>
+        {parts.articleText}
+      </span>
+      <span>{parts.rest}</span>
+    </span>
+  )
+}
+
 function createSeedCard(id: string, german: string, translation: string, note = ''): Flashcard {
   return {
     id,
@@ -151,7 +179,7 @@ function createGoetheDeck(): Deck {
   return {
     id: GOETHE_DECK_ID,
     title: 'Goethe B1 - Wortschatz',
-    description: 'Lista inicial enviada pela cliente, com vocabulario Goethe B1.',
+    description: 'Lista inicial enviada pela cliente, com vocabulário Goethe B1.',
     createdAt: SEED_CREATED_AT,
     updatedAt: SEED_CREATED_AT,
     cards: goetheB1Cards.map((card, index) =>
@@ -238,18 +266,18 @@ function getDifficultyLabel(card: Flashcard) {
   const score = getDifficultyScore(card)
 
   if (score >= 6) {
-    return 'muito dificil'
+    return 'muito difícil'
   }
 
   if (score >= 3) {
-    return 'dificil'
+    return 'difícil'
   }
 
   if (card.repetitions === 0) {
     return 'nova'
   }
 
-  return 'estavel'
+  return 'estável'
 }
 
 function getShuffleScore(cardId: string, seed: string) {
@@ -414,7 +442,7 @@ function App() {
 
   function deleteDeck(deckId: string) {
     const nextDecks = decks.filter((deck) => deck.id !== deckId)
-    updateDecks(nextDecks.length > 0 ? nextDecks : [createDeck('Alemao basico')])
+    updateDecks(nextDecks.length > 0 ? nextDecks : [createDeck('Alemão básico')])
     setEditingDeckId(null)
   }
 
@@ -535,7 +563,7 @@ function App() {
       <header className="app-header">
         <div>
           <p className="eyebrow">DeutschDeck</p>
-          <h1>Flashcards de alemao</h1>
+          <h1>Flashcards de alemão</h1>
         </div>
         <label className="deck-picker">
           <span>Lista ativa</span>
@@ -571,7 +599,7 @@ function App() {
         </article>
       </section>
 
-      <nav className="view-tabs" aria-label="Navegacao principal">
+      <nav className="view-tabs" aria-label="Navegação principal">
         <button
           type="button"
           className={view === 'study' ? 'active' : ''}
@@ -618,22 +646,24 @@ function App() {
 
               <article className={`flashcard ${isAnswerVisible ? 'is-revealed' : ''}`}>
                 <div className="card-topline">
-                  <p className="card-label">Alemao</p>
+                  <p className="card-label">Alemão</p>
                   {getArticle(currentCard) && (
                     <span className={`article-badge article-${getArticle(currentCard)}`}>
                       {getArticleLabel(getArticle(currentCard))}
                     </span>
                   )}
                 </div>
-                <h2>{currentCard.german}</h2>
+                <h2>
+                  <GermanWord card={currentCard} />
+                </h2>
                 {isAnswerVisible ? (
                   <div className="answer">
-                    <p className="card-label">Portugues</p>
+                    <p className="card-label">Português</p>
                     <strong>{currentCard.translation}</strong>
                     {currentCard.note && <span>{currentCard.note}</span>}
                   </div>
                 ) : (
-                  <p className="prompt">Toque para conferir a traducao.</p>
+                  <p className="prompt">Toque para conferir a tradução.</p>
                 )}
               </article>
 
@@ -657,7 +687,7 @@ function App() {
                   className="primary-action"
                   onClick={() => setIsAnswerVisible(true)}
                 >
-                  Mostrar traducao
+                  Mostrar tradução
                 </button>
               )}
             </>
@@ -666,7 +696,7 @@ function App() {
               <p className="eyebrow">Tudo em dia</p>
               <h2>Nenhum card vencido nesta lista.</h2>
               <p>
-                Adicione novas palavras ou volte quando a proxima revisao aparecer.
+                Adicione novas palavras ou volte quando a próxima revisão aparecer.
               </p>
               <div className="inline-actions">
                 <button type="button" onClick={() => setView('words')}>
@@ -689,7 +719,7 @@ function App() {
               <h2>{activeDeck.title}</h2>
             </div>
             <label>
-              Palavra em alemao
+              Palavra em alemão
               <input
                 value={cardForm.german}
                 onChange={(event) =>
@@ -718,7 +748,7 @@ function App() {
               </select>
             </label>
             <label>
-              Traducao
+              Tradução
               <input
                 value={cardForm.translation}
                 onChange={(event) =>
@@ -766,7 +796,9 @@ function App() {
                           {getArticleLabel(getArticle(card))}
                         </span>
                       )}
-                      <strong>{card.german}</strong>
+                      <strong>
+                        <GermanWord card={card} compact />
+                      </strong>
                     </div>
                     <span>{card.translation}</span>
                     {card.note && <small>{card.note}</small>}
@@ -784,7 +816,7 @@ function App() {
                 </article>
               ))
             ) : (
-              <p className="muted">Esta lista ainda nao tem palavras.</p>
+              <p className="muted">Esta lista ainda não tem palavras.</p>
             )}
           </section>
         </section>
@@ -839,13 +871,13 @@ function App() {
                 onChange={(event) =>
                   setDeckForm((form) => ({ ...form, title: event.target.value }))
                 }
-                placeholder="Alemao para viagem"
+                placeholder="Alemão para viagem"
                 disabled={!editingDeckId}
                 required
               />
             </label>
             <label>
-              Descricao
+              Descrição
               <textarea
                 value={deckForm.description}
                 onChange={(event) =>
