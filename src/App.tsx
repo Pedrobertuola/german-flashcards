@@ -9,7 +9,7 @@ const GOETHE_DECK_ID = 'deck-goethe-b1-wordlist'
 const SEED_CREATED_AT = new Date('2026-01-01T00:00:00.000Z').getTime()
 
 type View = 'study' | 'words' | 'lists'
-type ReviewGrade = 'again' | 'hard' | 'good' | 'easy'
+type ReviewGrade = 'again' | 'hard' | 'easy'
 type ArticleTag = 'der' | 'die' | 'das' | 'plural'
 
 type Flashcard = {
@@ -49,50 +49,30 @@ type DeckForm = {
   description: string
 }
 
-const initialDecks: Deck[] = [
-  createGoetheDeck(),
-  {
-    id: 'deck-a1-essentials',
-    title: 'Alemão A1 essencial',
-    description: 'Palavras curtas para as primeiras conversas.',
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    cards: [
-      createCard('der Apfel', 'a maca', 'Ich esse einen Apfel.'),
-      createCard('das Wasser', 'a agua', 'Ein Glas Wasser, bitte.'),
-      createCard('die Wohnung', 'o apartamento', 'Meine Wohnung ist klein.'),
-      createCard('arbeiten', 'trabalhar', 'Ich arbeite heute.'),
-      createCard('schnell', 'rapido', 'Der Zug ist schnell.'),
-      createCard('langsam', 'devagar', 'Bitte sprechen Sie langsam.'),
-    ],
-  },
-  {
-    id: 'deck-daily-phrases',
-    title: 'Frases do dia a dia',
-    description: 'Expressoes praticas para usar sem pensar muito.',
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    cards: [
-      createCard('Guten Morgen', 'bom dia', 'Guten Morgen, wie geht es dir?'),
-      createCard('Ich verstehe nicht', 'eu não entendo', 'Entschuldigung, ich verstehe nicht.'),
-      createCard('Wie viel kostet das?', 'quanto custa isso?', 'Wie viel kostet das Brot?'),
-      createCard('Bis spaeter', 'ate mais tarde', 'Bis spaeter im Kurs.'),
-    ],
-  },
-]
+const studyGrades: ReviewGrade[] = ['again', 'hard', 'easy']
 
 const reviewLabels: Record<ReviewGrade, string> = {
-  again: 'Errei',
-  hard: 'Difícil',
-  good: 'Bom',
-  easy: 'Fácil',
+  again: 'Não sabia',
+  hard: 'Preciso revisar',
+  easy: 'Foi fácil',
+}
+
+const reviewIcons: Record<ReviewGrade, string> = {
+  again: '!',
+  hard: '~',
+  easy: '✓',
 }
 
 const reviewHints: Record<ReviewGrade, string> = {
-  again: 'rever em minutos',
-  hard: 'rever amanha',
-  good: 'aumentar intervalo',
-  easy: 'espacar mais',
+  again: 'Volta daqui a pouco',
+  hard: 'Mantém perto de você',
+  easy: 'Aumenta o intervalo',
+}
+
+const reviewFeedback: Record<ReviewGrade, string> = {
+  again: 'Sem drama. Essa volta rapidinho.',
+  hard: 'Boa percepção. Vamos reforçar.',
+  easy: 'Sehr gut! Próxima palavra.',
 }
 
 function createId(prefix: string) {
@@ -103,17 +83,9 @@ function createId(prefix: string) {
 function detectArticle(german: string): ArticleTag | undefined {
   const normalized = german.trim().toLowerCase()
 
-  if (normalized.startsWith('der ')) {
-    return 'der'
-  }
-
-  if (normalized.startsWith('die ')) {
-    return 'die'
-  }
-
-  if (normalized.startsWith('das ')) {
-    return 'das'
-  }
+  if (normalized.startsWith('der ')) return 'der'
+  if (normalized.startsWith('die ')) return 'die'
+  if (normalized.startsWith('das ')) return 'das'
 
   return undefined
 }
@@ -123,30 +95,20 @@ function getArticle(card: Flashcard): ArticleTag | undefined {
 }
 
 function getArticleLabel(article: ArticleTag | undefined) {
-  if (!article) {
-    return ''
-  }
-
+  if (!article) return ''
   return article === 'plural' ? 'Plural' : article
 }
 
 function getWordParts(german: string) {
   const match = german.trim().match(/^(der|die|das)\s+(.+)$/i)
-
-  if (!match) {
-    return { articleText: '', rest: german }
-  }
-
-  return { articleText: match[1].toLowerCase(), rest: match[2] }
+  return match ? { articleText: match[1].toLowerCase(), rest: match[2] } : { articleText: '', rest: german }
 }
 
 function GermanWord({ card, compact = false }: { card: Flashcard; compact?: boolean }) {
   const article = getArticle(card)
   const parts = getWordParts(card.german)
 
-  if (!parts.articleText) {
-    return <>{card.german}</>
-  }
+  if (!parts.articleText) return <>{card.german}</>
 
   return (
     <span className={`german-word ${compact ? 'compact' : ''}`}>
@@ -179,7 +141,7 @@ function createGoetheDeck(): Deck {
   return {
     id: GOETHE_DECK_ID,
     title: 'Goethe B1 - Wortschatz',
-    description: 'Lista inicial enviada pela cliente, com vocabulário Goethe B1.',
+    description: 'Lista inicial com vocabulário Goethe B1.',
     createdAt: SEED_CREATED_AT,
     updatedAt: SEED_CREATED_AT,
     cards: goetheB1Cards.map((card, index) =>
@@ -220,21 +182,47 @@ function createDeck(title = 'Nova lista', description = ''): Deck {
   }
 }
 
+const initialDecks: Deck[] = [
+  createGoetheDeck(),
+  {
+    id: 'deck-a1-essentials',
+    title: 'Alemão A1 essencial',
+    description: 'Palavras curtas para as primeiras conversas.',
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    cards: [
+      createCard('der Apfel', 'a maçã', 'Ich esse einen Apfel.'),
+      createCard('das Wasser', 'a água', 'Ein Glas Wasser, bitte.'),
+      createCard('die Wohnung', 'o apartamento', 'Meine Wohnung ist klein.'),
+      createCard('arbeiten', 'trabalhar', 'Ich arbeite heute.'),
+      createCard('schnell', 'rápido', 'Der Zug ist schnell.'),
+      createCard('langsam', 'devagar', 'Bitte sprechen Sie langsam.'),
+    ],
+  },
+  {
+    id: 'deck-daily-phrases',
+    title: 'Frases do dia a dia',
+    description: 'Expressões práticas para usar sem pensar muito.',
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    cards: [
+      createCard('Guten Morgen', 'bom dia', 'Guten Morgen, wie geht es dir?'),
+      createCard('Ich verstehe nicht', 'eu não entendo', 'Entschuldigung, ich verstehe nicht.'),
+      createCard('Wie viel kostet das?', 'quanto custa isso?', 'Wie viel kostet das Brot?'),
+      createCard('Bis später', 'até mais tarde', 'Bis später im Kurs.'),
+    ],
+  },
+]
+
 function loadDecks() {
-  if (typeof window === 'undefined') {
-    return initialDecks
-  }
+  if (typeof window === 'undefined') return initialDecks
 
   try {
     const savedDecks = window.localStorage.getItem(STORAGE_KEY)
-    if (!savedDecks) {
-      return initialDecks
-    }
+    if (!savedDecks) return initialDecks
 
     const parsed = JSON.parse(savedDecks) as Deck[]
-    if (parsed.length === 0) {
-      return initialDecks
-    }
+    if (parsed.length === 0) return initialDecks
 
     const hasGoetheDeck = parsed.some((deck) => deck.id === GOETHE_DECK_ID)
     return hasGoetheDeck ? parsed : [createGoetheDeck(), ...parsed]
@@ -245,13 +233,10 @@ function loadDecks() {
 
 function getDueLabel(card: Flashcard, now: number) {
   const diff = card.dueAt - now
-
-  if (diff <= 0) {
-    return 'vence hoje'
-  }
+  if (diff <= 0) return 'vence hoje'
 
   const days = Math.ceil(diff / DAY_IN_MS)
-  return days === 1 ? 'amanha' : `em ${days} dias`
+  return days === 1 ? 'amanhã' : `em ${days} dias`
 }
 
 function getDifficultyScore(card: Flashcard) {
@@ -265,19 +250,30 @@ function getDifficultyScore(card: Flashcard) {
 function getDifficultyLabel(card: Flashcard) {
   const score = getDifficultyScore(card)
 
-  if (score >= 6) {
-    return 'muito difícil'
-  }
-
-  if (score >= 3) {
-    return 'difícil'
-  }
-
-  if (card.repetitions === 0) {
-    return 'nova'
-  }
+  if (score >= 6) return 'muito difícil'
+  if (score >= 3) return 'difícil'
+  if (card.repetitions === 0) return 'nova'
 
   return 'estável'
+}
+
+function getStartOfToday(now: number) {
+  const today = new Date(now)
+  today.setHours(0, 0, 0, 0)
+  return today.getTime()
+}
+
+function getMasteryPercent(cards: Flashcard[]) {
+  if (cards.length === 0) return 0
+
+  const masteredScore = cards.reduce((total, card) => {
+    if (card.repetitions >= 3 && card.lapses === 0) return total + 1
+    if (card.repetitions >= 2 && getDifficultyScore(card) < 3) return total + 0.75
+    if (card.repetitions >= 1) return total + 0.35
+    return total
+  }, 0)
+
+  return Math.round((masteredScore / cards.length) * 100)
 }
 
 function getShuffleScore(cardId: string, seed: string) {
@@ -298,22 +294,16 @@ function updateCardReview(card: Flashcard, grade: ReviewGrade): Flashcard {
       ? Math.max(1.3, card.ease - 0.25)
       : grade === 'hard'
         ? Math.max(1.3, card.ease - 0.1)
-        : grade === 'easy'
-          ? Math.min(3, card.ease + 0.2)
-          : card.ease
+        : Math.min(3, card.ease + 0.2)
 
   const nextInterval =
     grade === 'again'
       ? 0
       : grade === 'hard'
         ? Math.max(1, Math.round(card.intervalDays * 1.2))
-        : grade === 'easy'
-          ? card.repetitions === 0
-            ? 3
-            : Math.max(3, Math.round(card.intervalDays * (nextEase + 0.65)))
-          : card.repetitions === 0
-            ? 1
-            : Math.max(2, Math.round(card.intervalDays * nextEase))
+        : card.repetitions === 0
+          ? 3
+          : Math.max(3, Math.round(card.intervalDays * (nextEase + 0.65)))
 
   return {
     ...card,
@@ -343,6 +333,8 @@ function App() {
   })
   const [now, setNow] = useState(() => Date.now())
   const [studySeed, setStudySeed] = useState(() => createId('study'))
+  const [streak, setStreak] = useState(0)
+  const [reviewMessage, setReviewMessage] = useState('')
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(decks))
@@ -350,7 +342,6 @@ function App() {
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 60 * 1000)
-
     return () => window.clearInterval(timer)
   }, [])
 
@@ -360,9 +351,10 @@ function App() {
   )
 
   const allCards = useMemo(() => decks.flatMap((deck) => deck.cards), [decks])
+  const activeCards = useMemo(() => activeDeck?.cards ?? [], [activeDeck])
   const dueCards = useMemo(
     () =>
-      [...(activeDeck?.cards ?? [])]
+      [...activeCards]
         .filter((card) => card.dueAt <= now)
         .sort(
           (first, second) =>
@@ -370,11 +362,30 @@ function App() {
             first.dueAt - second.dueAt ||
             getShuffleScore(first.id, studySeed) - getShuffleScore(second.id, studySeed),
         ),
-    [activeDeck, now, studySeed],
+    [activeCards, now, studySeed],
   )
+
   const currentCard = dueCards[0]
   const dueTotal = allCards.filter((card) => card.dueAt <= now).length
   const hardTotal = allCards.filter((card) => getDifficultyScore(card) >= 3).length
+  const todayStart = getStartOfToday(now)
+  const activeDueTotal = activeCards.filter((card) => card.dueAt <= now).length
+  const reviewedToday = activeCards.filter(
+    (card) => card.lastReviewedAt && card.lastReviewedAt >= todayStart,
+  ).length
+  const masteryPercent = getMasteryPercent(activeCards)
+  const completionPercent =
+    activeDueTotal + reviewedToday === 0
+      ? 100
+      : Math.round((reviewedToday / (activeDueTotal + reviewedToday)) * 100)
+
+  function changeDeck(deckId: string) {
+    setActiveDeckId(deckId)
+    setStudySeed(createId('study'))
+    setIsAnswerVisible(false)
+    setReviewMessage('')
+    setStreak(0)
+  }
 
   function updateDecks(nextDecks: Deck[]) {
     setDecks(nextDecks)
@@ -384,10 +395,10 @@ function App() {
   }
 
   function handleReview(grade: ReviewGrade) {
-    if (!activeDeck || !currentCard) {
-      return
-    }
+    if (!activeDeck || !currentCard) return
 
+    setReviewMessage(reviewFeedback[grade])
+    setStreak((currentStreak) => (grade === 'again' ? 0 : currentStreak + 1))
     setDecks((currentDecks) =>
       currentDecks.map((deck) =>
         deck.id === activeDeck.id
@@ -402,6 +413,7 @@ function App() {
       ),
     )
     setIsAnswerVisible(false)
+    window.setTimeout(() => setReviewMessage(''), 1200)
   }
 
   function startDeckEdit(deck: Deck) {
@@ -421,9 +433,7 @@ function App() {
     event.preventDefault()
     const title = deckForm.title.trim()
 
-    if (!editingDeckId || !title) {
-      return
-    }
+    if (!editingDeckId || !title) return
 
     setDecks((currentDecks) =>
       currentDecks.map((deck) =>
@@ -467,17 +477,13 @@ function App() {
     const german = cardForm.german.trim()
     const translation = cardForm.translation.trim()
 
-    if (!activeDeck || !german || !translation) {
-      return
-    }
+    if (!activeDeck || !german || !translation) return
 
     const selectedArticle = cardForm.article || detectArticle(german)
 
     setDecks((currentDecks) =>
       currentDecks.map((deck) => {
-        if (deck.id !== activeDeck.id) {
-          return deck
-        }
+        if (deck.id !== activeDeck.id) return deck
 
         const nextCard = {
           ...createCard(german, translation, cardForm.note.trim()),
@@ -511,9 +517,7 @@ function App() {
   }
 
   function deleteCard(cardId: string) {
-    if (!activeDeck) {
-      return
-    }
+    if (!activeDeck) return
 
     setDecks((currentDecks) =>
       currentDecks.map((deck) =>
@@ -527,15 +531,11 @@ function App() {
       ),
     )
 
-    if (editingCardId === cardId) {
-      resetCardForm()
-    }
+    if (editingCardId === cardId) resetCardForm()
   }
 
   function resetProgress() {
-    if (!activeDeck) {
-      return
-    }
+    if (!activeDeck) return
 
     setDecks((currentDecks) =>
       currentDecks.map((deck) =>
@@ -556,25 +556,20 @@ function App() {
       ),
     )
     setIsAnswerVisible(false)
+    setStreak(0)
   }
 
   return (
     <main className="app-shell">
       <header className="app-header">
-        <div>
+        <div className="brand-block">
           <p className="eyebrow">DeutschDeck</p>
-          <h1>Flashcards de alemão</h1>
+          <h1>Seu treino de alemão, leve e constante.</h1>
+          <p>Revise alguns cards por dia e acompanhe seu avanço sem pressão.</p>
         </div>
         <label className="deck-picker">
           <span>Lista ativa</span>
-          <select
-            value={activeDeck?.id ?? ''}
-            onChange={(event) => {
-              setActiveDeckId(event.target.value)
-              setStudySeed(createId('study'))
-              setIsAnswerVisible(false)
-            }}
-          >
+          <select value={activeDeck?.id ?? ''} onChange={(event) => changeDeck(event.target.value)}>
             {decks.map((deck) => (
               <option key={deck.id} value={deck.id}>
                 {deck.title}
@@ -584,67 +579,87 @@ function App() {
         </label>
       </header>
 
-      <section className="stats-grid" aria-label="Resumo do estudo">
-        <article>
-          <strong>{dueTotal}</strong>
-          <span>para revisar</span>
-        </article>
-        <article>
-          <strong>{allCards.length}</strong>
-          <span>palavras</span>
-        </article>
-        <article>
-          <strong>{hardTotal}</strong>
-          <span>difíceis</span>
-        </article>
-      </section>
-
       <nav className="view-tabs" aria-label="Navegação principal">
-        <button
-          type="button"
-          className={view === 'study' ? 'active' : ''}
-          onClick={() => setView('study')}
-        >
+        <button type="button" className={view === 'study' ? 'active' : ''} onClick={() => setView('study')}>
           Estudar
         </button>
-        <button
-          type="button"
-          className={view === 'words' ? 'active' : ''}
-          onClick={() => setView('words')}
-        >
+        <button type="button" className={view === 'words' ? 'active' : ''} onClick={() => setView('words')}>
           Palavras
         </button>
-        <button
-          type="button"
-          className={view === 'lists' ? 'active' : ''}
-          onClick={() => setView('lists')}
-        >
+        <button type="button" className={view === 'lists' ? 'active' : ''} onClick={() => setView('lists')}>
           Listas
         </button>
       </nav>
 
       {view === 'study' && (
         <section className="study-panel">
+          <section className="today-panel" aria-label="Painel de estudo de hoje">
+            <div className="today-copy">
+              <p className="eyebrow">Bom estudo</p>
+              <h2>{activeDueTotal > 0 ? 'Pronto para revisar?' : 'Tudo leve por aqui.'}</h2>
+              <p>{activeDeck ? `${activeDeck.title} está selecionada.` : 'Escolha uma lista para começar.'}</p>
+            </div>
+            <div className="progress-ring" aria-label={`${masteryPercent}% de domínio aproximado`}>
+              <span>{masteryPercent}%</span>
+              <small>domínio</small>
+            </div>
+            <div className="daily-stats" aria-label="Resumo do estudo">
+              <article>
+                <strong>{activeDueTotal}</strong>
+                <span>faltam hoje</span>
+              </article>
+              <article>
+                <strong>{reviewedToday}</strong>
+                <span>revisadas</span>
+              </article>
+              <article>
+                <strong>{streak}</strong>
+                <span>sequência</span>
+              </article>
+              <article>
+                <strong>{dueTotal}</strong>
+                <span>em todas listas</span>
+              </article>
+            </div>
+            <div className="soft-progress" aria-hidden="true">
+              <span style={{ width: `${completionPercent}%` }} />
+            </div>
+            <button
+              type="button"
+              className="primary-action start-action"
+              onClick={() => {
+                setIsAnswerVisible(false)
+                setStudySeed(createId('study'))
+              }}
+            >
+              Começar revisão
+            </button>
+          </section>
+
+          {reviewMessage && <p className="review-toast">{reviewMessage}</p>}
+
           {activeDeck && currentCard ? (
             <>
               <div className="study-meta">
-                <span>{activeDeck.title}</span>
                 <span>
-                  {dueCards.length} agora · {getDifficultyLabel(currentCard)}
+                  {dueCards.length} cards na sessão · {getDifficultyLabel(currentCard)}
                 </span>
+                <button
+                  type="button"
+                  className="shuffle-action"
+                  onClick={() => {
+                    setStudySeed(createId('study'))
+                    setIsAnswerVisible(false)
+                  }}
+                >
+                  Embaralhar
+                </button>
               </div>
-              <button
-                type="button"
-                className="shuffle-action"
-                onClick={() => {
-                  setStudySeed(createId('study'))
-                  setIsAnswerVisible(false)
-                }}
-              >
-                Embaralhar ordem
-              </button>
 
-              <article className={`flashcard ${isAnswerVisible ? 'is-revealed' : ''}`}>
+              <article
+                key={`${currentCard.id}-${isAnswerVisible ? 'answer' : 'front'}`}
+                className={`flashcard ${isAnswerVisible ? 'is-revealed' : ''}`}
+              >
                 <div className="card-topline">
                   <p className="card-label">Alemão</p>
                   {getArticle(currentCard) && (
@@ -658,24 +673,29 @@ function App() {
                 </h2>
                 {isAnswerVisible ? (
                   <div className="answer">
-                    <p className="card-label">Português</p>
+                    <p className="card-label">Tradução</p>
                     <strong>{currentCard.translation}</strong>
-                    {currentCard.note && <span>{currentCard.note}</span>}
+                    <div className="example-box">
+                      <span>{currentCard.note || 'Sem exemplo cadastrado ainda.'}</span>
+                    </div>
                   </div>
                 ) : (
-                  <p className="prompt">Toque para conferir a tradução.</p>
+                  <p className="prompt">Leia em voz baixa e tente lembrar antes de revelar.</p>
                 )}
               </article>
 
               {isAnswerVisible ? (
-                <div className="review-actions">
-                  {(Object.keys(reviewLabels) as ReviewGrade[]).map((grade) => (
+                <div className="review-actions" aria-label="Como foi lembrar esta palavra?">
+                  {studyGrades.map((grade) => (
                     <button
                       key={grade}
                       type="button"
                       className={`grade grade-${grade}`}
                       onClick={() => handleReview(grade)}
                     >
+                      <span className="grade-icon" aria-hidden="true">
+                        {reviewIcons[grade]}
+                      </span>
                       <strong>{reviewLabels[grade]}</strong>
                       <span>{reviewHints[grade]}</span>
                     </button>
@@ -684,10 +704,10 @@ function App() {
               ) : (
                 <button
                   type="button"
-                  className="primary-action"
+                  className="primary-action reveal-action"
                   onClick={() => setIsAnswerVisible(true)}
                 >
-                  Mostrar tradução
+                  Mostrar resposta
                 </button>
               )}
             </>
@@ -695,9 +715,7 @@ function App() {
             <section className="empty-state">
               <p className="eyebrow">Tudo em dia</p>
               <h2>Nenhum card vencido nesta lista.</h2>
-              <p>
-                Adicione novas palavras ou volte quando a próxima revisão aparecer.
-              </p>
+              <p>Adicione novas palavras ou reestude a lista quando quiser reforçar.</p>
               <div className="inline-actions">
                 <button type="button" onClick={() => setView('words')}>
                   Editar palavras
@@ -837,15 +855,7 @@ function App() {
                 key={deck.id}
                 className={`deck-row ${deck.id === activeDeck?.id ? 'selected' : ''}`}
               >
-                <button
-                  type="button"
-                  className="deck-select"
-                  onClick={() => {
-                    setActiveDeckId(deck.id)
-                    setStudySeed(createId('study'))
-                    setIsAnswerVisible(false)
-                  }}
-                >
+                <button type="button" className="deck-select" onClick={() => changeDeck(deck.id)}>
                   <strong>{deck.title}</strong>
                   <span>
                     {deck.cards.length} palavras ·{' '}
@@ -883,7 +893,7 @@ function App() {
                 onChange={(event) =>
                   setDeckForm((form) => ({ ...form, description: event.target.value }))
                 }
-                placeholder="Contexto, objetivo ou nivel desta lista"
+                placeholder="Contexto, objetivo ou nível desta lista"
                 disabled={!editingDeckId}
                 rows={4}
               />
@@ -893,11 +903,7 @@ function App() {
                 Salvar lista
               </button>
               {editingDeckId && (
-                <button
-                  type="button"
-                  className="danger"
-                  onClick={() => deleteDeck(editingDeckId)}
-                >
+                <button type="button" className="danger" onClick={() => deleteDeck(editingDeckId)}>
                   Apagar lista
                 </button>
               )}
@@ -905,6 +911,11 @@ function App() {
           </form>
         </section>
       )}
+
+      <footer className="app-footer" aria-hidden="true">
+        <span>{allCards.length} palavras no total</span>
+        <span>{hardTotal} pedem carinho extra</span>
+      </footer>
     </main>
   )
 }
