@@ -287,21 +287,21 @@ function getMasteryPercent(cards: Flashcard[]) {
   return Math.round((masteredScore / cards.length) * 100)
 }
 
-function getShuffleScore(cardId: string, seed: string) {
-  const value = `${seed}:${cardId}`
-  let hash = 0
-
-  for (let index = 0; index < value.length; index += 1) {
-    hash = (hash * 31 + value.charCodeAt(index)) >>> 0
-  }
-
-  return hash
-}
-
 function getStudyPriority(card: Flashcard) {
   if (card.lapses > 0) return 0
   if (card.repetitions === 0) return 1
   return 2
+}
+
+function shuffleCards(cards: Flashcard[]) {
+  const shuffled = [...cards]
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1))
+    ;[shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]]
+  }
+
+  return shuffled
 }
 
 function updateCardReview(card: Flashcard, grade: ReviewGrade): Flashcard {
@@ -355,7 +355,7 @@ function App() {
     article: '',
   })
   const [now, setNow] = useState(() => Date.now())
-  const [studySeed, setStudySeed] = useState(() => createId('study'))
+  const [shuffleNonce, setShuffleNonce] = useState(0)
   const [streak, setStreak] = useState(0)
   const [reviewMessage, setReviewMessage] = useState('')
 
@@ -376,17 +376,18 @@ function App() {
   const allCards = useMemo(() => decks.flatMap((deck) => deck.cards), [decks])
   const activeCards = useMemo(() => activeDeck?.cards ?? [], [activeDeck])
   const dueCards = useMemo(
-    () =>
-      [...activeCards]
-        .filter((card) => card.dueAt <= now)
-        .sort(
-          (first, second) =>
-            getStudyPriority(first) - getStudyPriority(second) ||
-            getShuffleScore(first.id, studySeed) - getShuffleScore(second.id, studySeed) ||
-            first.dueAt - second.dueAt ||
-            getDifficultyScore(second) - getDifficultyScore(first),
+    () => {
+      void shuffleNonce
+
+      return [0, 1, 2].flatMap((priority) =>
+        shuffleCards(
+          activeCards.filter(
+            (card) => card.dueAt <= now && getStudyPriority(card) === priority,
+          ),
         ),
-    [activeCards, now, studySeed],
+      )
+    },
+    [activeCards, now, shuffleNonce],
   )
 
   const currentCard = dueCards[0]
@@ -405,7 +406,7 @@ function App() {
 
   function changeDeck(deckId: string) {
     setActiveDeckId(deckId)
-    setStudySeed(createId('study'))
+    setShuffleNonce((value) => value + 1)
     setIsAnswerVisible(false)
     setReviewMessage('')
     setStreak(0)
@@ -653,7 +654,7 @@ function App() {
               className="primary-action start-action"
               onClick={() => {
                 setIsAnswerVisible(false)
-                setStudySeed(createId('study'))
+                setShuffleNonce((value) => value + 1)
               }}
             >
               Começar revisão
@@ -672,7 +673,7 @@ function App() {
                   type="button"
                   className="shuffle-action"
                   onClick={() => {
-                    setStudySeed(createId('study'))
+                    setShuffleNonce((value) => value + 1)
                     setIsAnswerVisible(false)
                   }}
                 >
