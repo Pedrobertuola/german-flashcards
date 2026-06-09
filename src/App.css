@@ -402,23 +402,23 @@ button:disabled {
 }
 
 .article-der {
-  background: #cfe6ff;
-  color: #174c88;
+  background: #bfdbfe;
+  color: #1e40af;
 }
 
 .article-die {
-  background: #ffe0ea;
-  color: #983450;
+  background: #fbcfe8;
+  color: #be185d;
 }
 
 .article-das {
-  background: #d9f2d1;
-  color: #2f6730;
+  background: #bbf7d0;
+  color: #166534;
 }
 
 .article-plural {
-  background: #ffe2bc;
-  color: #995313;
+  background: #fed7aa;
+  color: #c2410c;
 }
 
 .answer {

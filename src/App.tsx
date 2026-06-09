@@ -9,7 +9,7 @@ const GOETHE_DECK_ID = 'deck-goethe-b1-wordlist'
 const SEED_CREATED_AT = new Date('2026-01-01T00:00:00.000Z').getTime()
 
 type View = 'study' | 'words' | 'lists'
-type ReviewGrade = 'again' | 'hard' | 'easy'
+type ReviewGrade = 'again' | 'hard' | 'good' | 'easy'
 type ArticleTag = 'der' | 'die' | 'das' | 'plural'
 
 type Flashcard = {
@@ -54,24 +54,28 @@ const studyGrades: ReviewGrade[] = ['again', 'hard', 'easy']
 const reviewLabels: Record<ReviewGrade, string> = {
   again: 'Não sabia',
   hard: 'Preciso revisar',
+  good: 'Lembrei',
   easy: 'Foi fácil',
 }
 
 const reviewIcons: Record<ReviewGrade, string> = {
   again: '!',
   hard: '~',
+  good: '+',
   easy: '✓',
 }
 
 const reviewHints: Record<ReviewGrade, string> = {
   again: 'Volta daqui a pouco',
   hard: 'Mantém perto de você',
+  good: 'Segue no ritmo',
   easy: 'Aumenta o intervalo',
 }
 
 const reviewFeedback: Record<ReviewGrade, string> = {
   again: 'Sem drama. Essa volta rapidinho.',
   hard: 'Boa percepção. Vamos reforçar.',
+  good: 'Boa. Vamos em frente.',
   easy: 'Sehr gut! Próxima palavra.',
 }
 
@@ -101,14 +105,21 @@ function getArticleLabel(article: ArticleTag | undefined) {
 
 function getWordParts(german: string) {
   const match = german.trim().match(/^(der|die|das)\s+(.+)$/i)
-  return match ? { articleText: match[1].toLowerCase(), rest: match[2] } : { articleText: '', rest: german }
+
+  if (!match) {
+    return { articleText: '', rest: german }
+  }
+
+  return { articleText: match[1].toLowerCase(), rest: match[2] }
 }
 
 function GermanWord({ card, compact = false }: { card: Flashcard; compact?: boolean }) {
   const article = getArticle(card)
   const parts = getWordParts(card.german)
 
-  if (!parts.articleText) return <>{card.german}</>
+  if (!parts.articleText) {
+    return <>{card.german}</>
+  }
 
   return (
     <span className={`german-word ${compact ? 'compact' : ''}`}>
@@ -287,6 +298,12 @@ function getShuffleScore(cardId: string, seed: string) {
   return hash
 }
 
+function getStudyPriority(card: Flashcard) {
+  if (card.lapses > 0) return 0
+  if (card.repetitions === 0) return 1
+  return 2
+}
+
 function updateCardReview(card: Flashcard, grade: ReviewGrade): Flashcard {
   const now = Date.now()
   const nextEase =
@@ -294,16 +311,22 @@ function updateCardReview(card: Flashcard, grade: ReviewGrade): Flashcard {
       ? Math.max(1.3, card.ease - 0.25)
       : grade === 'hard'
         ? Math.max(1.3, card.ease - 0.1)
-        : Math.min(3, card.ease + 0.2)
+        : grade === 'easy'
+          ? Math.min(3, card.ease + 0.2)
+          : card.ease
 
   const nextInterval =
     grade === 'again'
       ? 0
       : grade === 'hard'
         ? Math.max(1, Math.round(card.intervalDays * 1.2))
-        : card.repetitions === 0
-          ? 3
-          : Math.max(3, Math.round(card.intervalDays * (nextEase + 0.65)))
+        : grade === 'easy'
+          ? card.repetitions === 0
+            ? 3
+            : Math.max(3, Math.round(card.intervalDays * (nextEase + 0.65)))
+          : card.repetitions === 0
+            ? 1
+            : Math.max(2, Math.round(card.intervalDays * nextEase))
 
   return {
     ...card,
@@ -358,9 +381,10 @@ function App() {
         .filter((card) => card.dueAt <= now)
         .sort(
           (first, second) =>
-            getDifficultyScore(second) - getDifficultyScore(first) ||
+            getStudyPriority(first) - getStudyPriority(second) ||
+            getShuffleScore(first.id, studySeed) - getShuffleScore(second.id, studySeed) ||
             first.dueAt - second.dueAt ||
-            getShuffleScore(first.id, studySeed) - getShuffleScore(second.id, studySeed),
+            getDifficultyScore(second) - getDifficultyScore(first),
         ),
     [activeCards, now, studySeed],
   )
