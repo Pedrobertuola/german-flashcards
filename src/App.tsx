@@ -52,10 +52,10 @@ type DeckForm = {
 const studyGrades: ReviewGrade[] = ['again', 'hard', 'easy']
 
 const reviewLabels: Record<ReviewGrade, string> = {
-  again: 'Não sabia',
-  hard: 'Preciso revisar',
-  good: 'Lembrei',
-  easy: 'Foi fácil',
+  again: "Didn't know it",
+  hard: 'Need review',
+  good: 'Remembered',
+  easy: 'Too easy',
 }
 
 const reviewIcons: Record<ReviewGrade, string> = {
@@ -66,17 +66,17 @@ const reviewIcons: Record<ReviewGrade, string> = {
 }
 
 const reviewHints: Record<ReviewGrade, string> = {
-  again: 'Volta daqui a pouco',
-  hard: 'Mantém perto de você',
-  good: 'Segue no ritmo',
-  easy: 'Aumenta o intervalo',
+  again: 'Comes back soon',
+  hard: 'Keep it close',
+  good: 'Keep the rhythm',
+  easy: 'Increase interval',
 }
 
 const reviewFeedback: Record<ReviewGrade, string> = {
-  again: 'Sem drama. Essa volta rapidinho.',
-  hard: 'Boa percepção. Vamos reforçar.',
-  good: 'Boa. Vamos em frente.',
-  easy: 'Sehr gut! Próxima palavra.',
+  again: 'No pressure. This one comes back soon.',
+  hard: "Good call. Let's reinforce it.",
+  good: "Nice. Let's keep going.",
+  easy: 'Sehr gut! Next word.',
 }
 
 function createId(prefix: string) {
@@ -152,7 +152,7 @@ function createGoetheDeck(): Deck {
   return {
     id: GOETHE_DECK_ID,
     title: 'Goethe B1 - Wortschatz',
-    description: 'Lista inicial com vocabulário Goethe B1.',
+    description: 'Starter deck with Goethe B1 vocabulary.',
     createdAt: SEED_CREATED_AT,
     updatedAt: SEED_CREATED_AT,
     cards: goetheB1Cards.map((card, index) =>
@@ -180,7 +180,7 @@ function createCard(german = '', translation = '', note = ''): Flashcard {
   }
 }
 
-function createDeck(title = 'Nova lista', description = ''): Deck {
+function createDeck(title = 'New deck', description = ''): Deck {
   const now = Date.now()
 
   return {
@@ -197,30 +197,30 @@ const initialDecks: Deck[] = [
   createGoetheDeck(),
   {
     id: 'deck-a1-essentials',
-    title: 'Alemão A1 essencial',
-    description: 'Palavras curtas para as primeiras conversas.',
+    title: 'German A1 essentials',
+    description: 'Short words for first conversations.',
     createdAt: Date.now(),
     updatedAt: Date.now(),
     cards: [
-      createCard('der Apfel', 'a maçã', 'Ich esse einen Apfel.'),
-      createCard('das Wasser', 'a água', 'Ein Glas Wasser, bitte.'),
-      createCard('die Wohnung', 'o apartamento', 'Meine Wohnung ist klein.'),
-      createCard('arbeiten', 'trabalhar', 'Ich arbeite heute.'),
-      createCard('schnell', 'rápido', 'Der Zug ist schnell.'),
-      createCard('langsam', 'devagar', 'Bitte sprechen Sie langsam.'),
+      createCard('der Apfel', 'the apple', 'Ich esse einen Apfel.'),
+      createCard('das Wasser', 'the water', 'Ein Glas Wasser, bitte.'),
+      createCard('die Wohnung', 'the apartment', 'Meine Wohnung ist klein.'),
+      createCard('arbeiten', 'to work', 'Ich arbeite heute.'),
+      createCard('schnell', 'fast', 'Der Zug ist schnell.'),
+      createCard('langsam', 'slow', 'Bitte sprechen Sie langsam.'),
     ],
   },
   {
     id: 'deck-daily-phrases',
-    title: 'Frases do dia a dia',
-    description: 'Expressões práticas para usar sem pensar muito.',
+    title: 'Everyday phrases',
+    description: 'Practical expressions to use without overthinking.',
     createdAt: Date.now(),
     updatedAt: Date.now(),
     cards: [
-      createCard('Guten Morgen', 'bom dia', 'Guten Morgen, wie geht es dir?'),
-      createCard('Ich verstehe nicht', 'eu não entendo', 'Entschuldigung, ich verstehe nicht.'),
-      createCard('Wie viel kostet das?', 'quanto custa isso?', 'Wie viel kostet das Brot?'),
-      createCard('Bis später', 'até mais tarde', 'Bis später im Kurs.'),
+      createCard('Guten Morgen', 'good morning', 'Guten Morgen, wie geht es dir?'),
+      createCard("Ich verstehe nicht", "I don't understand", 'Entschuldigung, ich verstehe nicht.'),
+      createCard('Wie viel kostet das?', 'how much does this cost?', 'Wie viel kostet das Brot?'),
+      createCard('Bis später', 'see you later', 'Bis später im Kurs.'),
     ],
   },
 ]
@@ -244,10 +244,10 @@ function loadDecks() {
 
 function getDueLabel(card: Flashcard, now: number) {
   const diff = card.dueAt - now
-  if (diff <= 0) return 'vence hoje'
+  if (diff <= 0) return 'due today'
 
   const days = Math.ceil(diff / DAY_IN_MS)
-  return days === 1 ? 'amanhã' : `em ${days} dias`
+  return days === 1 ? 'tomorrow' : `in ${days} days`
 }
 
 function getDifficultyScore(card: Flashcard) {
@@ -261,11 +261,11 @@ function getDifficultyScore(card: Flashcard) {
 function getDifficultyLabel(card: Flashcard) {
   const score = getDifficultyScore(card)
 
-  if (score >= 6) return 'muito difícil'
-  if (score >= 3) return 'difícil'
-  if (card.repetitions === 0) return 'nova'
+  if (score >= 6) return 'very hard'
+  if (score >= 3) return 'hard'
+  if (card.repetitions === 0) return 'new'
 
-  return 'estável'
+  return 'stable'
 }
 
 function getStartOfToday(now: number) {
@@ -477,7 +477,7 @@ function App() {
 
   function deleteDeck(deckId: string) {
     const nextDecks = decks.filter((deck) => deck.id !== deckId)
-    updateDecks(nextDecks.length > 0 ? nextDecks : [createDeck('Alemão básico')])
+    updateDecks(nextDecks.length > 0 ? nextDecks : [createDeck('Basic German')])
     setEditingDeckId(null)
   }
 
@@ -589,11 +589,11 @@ function App() {
       <header className="app-header">
         <div className="brand-block">
           <p className="eyebrow">DeutschDeck</p>
-          <h1>Seu treino de alemão, leve e constante.</h1>
-          <p>Revise alguns cards por dia e acompanhe seu avanço sem pressão.</p>
+          <h1>Your German practice, light and consistent.</h1>
+          <p>Review a few cards each day and track your progress without pressure.</p>
         </div>
         <label className="deck-picker">
-          <span>Lista ativa</span>
+          <span>Active deck</span>
           <select value={activeDeck?.id ?? ''} onChange={(event) => changeDeck(event.target.value)}>
             {decks.map((deck) => (
               <option key={deck.id} value={deck.id}>
@@ -604,46 +604,46 @@ function App() {
         </label>
       </header>
 
-      <nav className="view-tabs" aria-label="Navegação principal">
+      <nav className="view-tabs" aria-label="Main navigation">
         <button type="button" className={view === 'study' ? 'active' : ''} onClick={() => setView('study')}>
-          Estudar
+          Study
         </button>
         <button type="button" className={view === 'words' ? 'active' : ''} onClick={() => setView('words')}>
-          Palavras
+          Words
         </button>
         <button type="button" className={view === 'lists' ? 'active' : ''} onClick={() => setView('lists')}>
-          Listas
+          Decks
         </button>
       </nav>
 
       {view === 'study' && (
         <section className="study-panel">
-          <section className="today-panel" aria-label="Painel de estudo de hoje">
+          <section className="today-panel" aria-label="Today study panel">
             <div className="today-copy">
-              <p className="eyebrow">Bom estudo</p>
-              <h2>{activeDueTotal > 0 ? 'Pronto para revisar?' : 'Tudo leve por aqui.'}</h2>
-              <p>{activeDeck ? `${activeDeck.title} está selecionada.` : 'Escolha uma lista para começar.'}</p>
+              <p className="eyebrow">Good study session</p>
+              <h2>{activeDueTotal > 0 ? 'Ready to review?' : 'All clear here.'}</h2>
+              <p>{activeDeck ? `${activeDeck.title} is selected.` : 'Choose a deck to start.'}</p>
             </div>
-            <div className="progress-ring" aria-label={`${masteryPercent}% de domínio aproximado`}>
+            <div className="progress-ring" aria-label={`${masteryPercent}% estimated mastery`}>
               <span>{masteryPercent}%</span>
-              <small>domínio</small>
+              <small>mastery</small>
             </div>
-            <div className="daily-stats" aria-label="Resumo do estudo">
+            <div className="daily-stats" aria-label="Study summary">
               <article>
                 <strong>{activeDueTotal}</strong>
-                <span>faltam hoje</span>
+                <span>due today</span>
               </article>
               <article>
                 <strong>{reviewedToday}</strong>
-                <span>revisadas</span>
+                <span>reviewed</span>
               </article>
               <article>
                 <strong>{streak}</strong>
-                <span>sequência</span>
+                <span>streak</span>
               </article>
               <article>
                 <strong>{dueTotal}</strong>
-                <span>em todas listas</span>
+                <span>across decks</span>
               </article>
             </div>
             <div className="soft-progress" aria-hidden="true">
@@ -657,7 +657,7 @@ function App() {
                 setShuffleNonce((value) => value + 1)
               }}
             >
-              Começar revisão
+              Start review
             </button>
           </section>
 
@@ -667,7 +667,7 @@ function App() {
             <>
               <div className="study-meta">
                 <span>
-                  {dueCards.length} cards na sessão · {getDifficultyLabel(currentCard)}
+                  {dueCards.length} cards in session · {getDifficultyLabel(currentCard)}
                 </span>
                 <button
                   type="button"
@@ -677,7 +677,7 @@ function App() {
                     setIsAnswerVisible(false)
                   }}
                 >
-                  Embaralhar
+                  Shuffle
                 </button>
               </div>
 
@@ -686,7 +686,7 @@ function App() {
                 className={`flashcard ${isAnswerVisible ? 'is-revealed' : ''}`}
               >
                 <div className="card-topline">
-                  <p className="card-label">Alemão</p>
+                  <p className="card-label">German</p>
                   {getArticle(currentCard) && (
                     <span className={`article-badge article-${getArticle(currentCard)}`}>
                       {getArticleLabel(getArticle(currentCard))}
@@ -698,19 +698,19 @@ function App() {
                 </h2>
                 {isAnswerVisible ? (
                   <div className="answer">
-                    <p className="card-label">Tradução</p>
+                    <p className="card-label">Translation</p>
                     <strong>{currentCard.translation}</strong>
                     <div className="example-box">
-                      <span>{currentCard.note || 'Sem exemplo cadastrado ainda.'}</span>
+                      <span>{currentCard.note || 'No example added yet.'}</span>
                     </div>
                   </div>
                 ) : (
-                  <p className="prompt">Leia em voz baixa e tente lembrar antes de revelar.</p>
+                  <p className="prompt">Read it quietly and try to remember before revealing.</p>
                 )}
               </article>
 
               {isAnswerVisible ? (
-                <div className="review-actions" aria-label="Como foi lembrar esta palavra?">
+                <div className="review-actions" aria-label="How well did you remember this word?">
                   {studyGrades.map((grade) => (
                     <button
                       key={grade}
@@ -732,21 +732,21 @@ function App() {
                   className="primary-action reveal-action"
                   onClick={() => setIsAnswerVisible(true)}
                 >
-                  Mostrar resposta
+                  Show answer
                 </button>
               )}
             </>
           ) : (
             <section className="empty-state">
-              <p className="eyebrow">Tudo em dia</p>
-              <h2>Nenhum card vencido nesta lista.</h2>
-              <p>Adicione novas palavras ou reestude a lista quando quiser reforçar.</p>
+              <p className="eyebrow">All caught up</p>
+              <h2>No due cards in this deck.</h2>
+              <p>Add new words or restudy the deck whenever you want to reinforce it.</p>
               <div className="inline-actions">
                 <button type="button" onClick={() => setView('words')}>
-                  Editar palavras
+                  Edit words
                 </button>
                 <button type="button" onClick={resetProgress}>
-                  Reestudar lista
+                  Restudy deck
                 </button>
               </div>
             </section>
@@ -758,11 +758,11 @@ function App() {
         <section className="workspace-grid">
           <form className="editor-panel" onSubmit={saveCard}>
             <div className="section-heading">
-              <p className="eyebrow">{editingCardId ? 'Editar palavra' : 'Nova palavra'}</p>
+              <p className="eyebrow">{editingCardId ? 'Edit word' : 'New word'}</p>
               <h2>{activeDeck.title}</h2>
             </div>
             <label>
-              Palavra em alemão
+              German word
               <input
                 value={cardForm.german}
                 onChange={(event) =>
@@ -773,7 +773,7 @@ function App() {
               />
             </label>
             <label>
-              Artigo ou tipo
+              Article or type
               <select
                 value={cardForm.article}
                 onChange={(event) =>
@@ -783,26 +783,26 @@ function App() {
                   }))
                 }
               >
-                <option value="">Detectar automaticamente</option>
-                <option value="der">der - azul</option>
-                <option value="die">die - rosa</option>
-                <option value="das">das - verde</option>
-                <option value="plural">Plural - laranja</option>
+                <option value="">Detect automatically</option>
+                <option value="der">der - blue</option>
+                <option value="die">die - pink</option>
+                <option value="das">das - green</option>
+                <option value="plural">Plural - orange</option>
               </select>
             </label>
             <label>
-              Tradução
+              Translation
               <input
                 value={cardForm.translation}
                 onChange={(event) =>
                   setCardForm((form) => ({ ...form, translation: event.target.value }))
                 }
-                placeholder="o jornal"
+                placeholder="the newspaper"
                 required
               />
             </label>
             <label>
-              Exemplo ou nota
+              Example or note
               <textarea
                 value={cardForm.note}
                 onChange={(event) =>
@@ -814,11 +814,11 @@ function App() {
             </label>
             <div className="form-actions">
               <button type="submit" className="primary-action">
-                {editingCardId ? 'Salvar palavra' : 'Adicionar palavra'}
+                {editingCardId ? 'Save word' : 'Add word'}
               </button>
               {editingCardId && (
                 <button type="button" onClick={resetCardForm}>
-                  Cancelar
+                  Cancel
                 </button>
               )}
             </div>
@@ -826,8 +826,8 @@ function App() {
 
           <section className="word-list">
             <div className="section-heading">
-              <p className="eyebrow">Vocabulário</p>
-              <h2>{activeDeck.cards.length} palavras</h2>
+              <p className="eyebrow">Vocabulary</p>
+              <h2>{activeDeck.cards.length} words</h2>
             </div>
             {activeDeck.cards.length > 0 ? (
               activeDeck.cards.map((card) => (
@@ -850,16 +850,16 @@ function App() {
                     <span>{getDueLabel(card, now)}</span>
                     <span className="difficulty-pill">{getDifficultyLabel(card)}</span>
                     <button type="button" onClick={() => startCardEdit(card)}>
-                      Editar
+                      Edit
                     </button>
                     <button type="button" className="danger" onClick={() => deleteCard(card.id)}>
-                      Apagar
+                      Delete
                     </button>
                   </div>
                 </article>
               ))
             ) : (
-              <p className="muted">Esta lista ainda não tem palavras.</p>
+              <p className="muted">This deck does not have any words yet.</p>
             )}
           </section>
         </section>
@@ -869,11 +869,11 @@ function App() {
         <section className="workspace-grid">
           <section className="deck-list">
             <div className="section-heading">
-              <p className="eyebrow">Minhas listas</p>
-              <h2>{decks.length} listas salvas</h2>
+              <p className="eyebrow">My decks</p>
+              <h2>{decks.length} saved decks</h2>
             </div>
             <button type="button" className="primary-action" onClick={createNewDeck}>
-              Criar lista
+              Create deck
             </button>
             {decks.map((deck) => (
               <article
@@ -883,12 +883,12 @@ function App() {
                 <button type="button" className="deck-select" onClick={() => changeDeck(deck.id)}>
                   <strong>{deck.title}</strong>
                   <span>
-                    {deck.cards.length} palavras ·{' '}
-                    {deck.cards.filter((card) => card.dueAt <= now).length} vencidas
+                    {deck.cards.length} words ·{' '}
+                    {deck.cards.filter((card) => card.dueAt <= now).length} due
                   </span>
                 </button>
                 <button type="button" onClick={() => startDeckEdit(deck)}>
-                  Editar
+                  Edit
                 </button>
               </article>
             ))}
@@ -896,40 +896,40 @@ function App() {
 
           <form className="editor-panel" onSubmit={saveDeck}>
             <div className="section-heading">
-              <p className="eyebrow">Editor de lista</p>
-              <h2>{editingDeckId ? 'Ajustar lista' : 'Selecione uma lista'}</h2>
+              <p className="eyebrow">Deck editor</p>
+              <h2>{editingDeckId ? 'Adjust deck' : 'Select a deck'}</h2>
             </div>
             <label>
-              Nome da lista
+              Deck name
               <input
                 value={deckForm.title}
                 onChange={(event) =>
                   setDeckForm((form) => ({ ...form, title: event.target.value }))
                 }
-                placeholder="Alemão para viagem"
+                placeholder="German for travel"
                 disabled={!editingDeckId}
                 required
               />
             </label>
             <label>
-              Descrição
+              Description
               <textarea
                 value={deckForm.description}
                 onChange={(event) =>
                   setDeckForm((form) => ({ ...form, description: event.target.value }))
                 }
-                placeholder="Contexto, objetivo ou nível desta lista"
+                placeholder="Context, goal, or level for this deck"
                 disabled={!editingDeckId}
                 rows={4}
               />
             </label>
             <div className="form-actions">
               <button type="submit" className="primary-action" disabled={!editingDeckId}>
-                Salvar lista
+                Save deck
               </button>
               {editingDeckId && (
                 <button type="button" className="danger" onClick={() => deleteDeck(editingDeckId)}>
-                  Apagar lista
+                  Delete deck
                 </button>
               )}
             </div>
@@ -938,8 +938,8 @@ function App() {
       )}
 
       <footer className="app-footer" aria-hidden="true">
-        <span>{allCards.length} palavras no total</span>
-        <span>{hardTotal} pedem carinho extra</span>
+        <span>{allCards.length} total words</span>
+        <span>{hardTotal} need extra care</span>
       </footer>
     </main>
   )

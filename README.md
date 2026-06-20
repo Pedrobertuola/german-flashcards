@@ -1,40 +1,40 @@
 # DeutschDeck
 
-Aplicacao web para estudo de vocabulario em alemao com foco em revisao diaria, acompanhamento de progresso e criacao de listas personalizadas.
+Web application for learning German vocabulary through daily review, progress tracking, and custom flashcard decks.
 
-Projeto publicado: [german-flashcards-delta.vercel.app](https://german-flashcards-delta.vercel.app/)
+Live project: [german-flashcards-delta.vercel.app](https://german-flashcards-delta.vercel.app/)
 
-## Visao geral
+## Overview
 
-O DeutschDeck foi desenvolvido para tornar o estudo de alemao mais leve, visual e constante. A experiencia foi pensada para quem quer revisar palavras todos os dias sem depender de uma interface complicada, com acompanhamento claro do que precisa ser estudado e do que ja foi consolidado.
+DeutschDeck was built to make German practice feel lightweight, visual, and consistent. The experience is designed for learners who want to review a few words every day without relying on a cluttered interface, while still keeping track of what needs attention and what is already improving.
 
-Como projeto de portfolio, ele destaca minha capacidade de desenvolver uma aplicacao completa do frontend ao deploy, com atencao para usabilidade, persistencia de dados no navegador e experiencia semelhante a app nativo.
+As a portfolio project, it highlights my ability to build and ship a complete frontend application, with attention to usability, local persistence, and a product experience that feels close to a native app.
 
-## Destaque: PWA
+## PWA Highlight
 
-Um dos principais diferenciais do projeto e que ele foi construido como **PWA (Progressive Web App)**.
+One of the main strengths of this project is that it was built as a **PWA (Progressive Web App)**.
 
-Isso significa que a aplicacao:
+That means the application:
 
-- pode ser instalada no celular ou no desktop
-- funciona em modo standalone, com aparencia de app
-- possui estrutura preparada para cache e carregamento rapido
-- oferece uma experiencia mobile-first mais proxima de um produto real
+- can be installed on mobile or desktop
+- runs in standalone mode with an app-like experience
+- is prepared for caching and fast loading
+- delivers a more polished mobile-first product experience
 
 ## Preview
 
-![Preview do DeutschDeck](./public/app-preview.png)
+![DeutschDeck preview](./public/app-preview.png)
 
-## Funcionalidades
+## Features
 
-- revisao de flashcards com repeticao espacada
-- listas pre-carregadas e criacao de listas personalizadas
-- cadastro, edicao e exclusao de palavras
-- acompanhamento de progresso diario
-- indicadores de dominio, sequencia e dificuldade
-- armazenamento local dos dados do usuario no navegador
+- flashcard review with spaced repetition logic
+- preloaded decks and custom deck creation
+- add, edit, and delete vocabulary cards
+- daily progress tracking
+- mastery, streak, and difficulty indicators
+- local browser storage for user data
 
-## Tecnologias utilizadas
+## Tech Stack
 
 - React
 - TypeScript
@@ -42,20 +42,20 @@ Isso significa que a aplicacao:
 - `vite-plugin-pwa`
 - Vercel
 
-## O que este projeto demonstra
+## What This Project Demonstrates
 
-- desenvolvimento de interface responsiva com foco em experiencia do usuario
-- organizacao de estado e regras de negocio no frontend
-- uso de recursos modernos da plataforma web para criar um PWA instalavel
-- publicacao de uma aplicacao real em producao
+- responsive interface development with strong user experience focus
+- frontend state management and business logic organization
+- use of modern web platform features to build an installable PWA
+- deployment of a real production application
 
-## Como executar localmente
+## Run Locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Objetivo no portfolio
+## Portfolio Context
 
-Este projeto representa meu interesse em construir produtos web uteis, bem apresentados e com preocupacao real com a experiencia final. Para uma candidatura de estagio, ele demonstra iniciativa, autonomia para publicar uma aplicacao completa e cuidado com detalhes de produto, nao apenas com a implementacao tecnica.
+This project reflects my interest in building useful, polished web products with real attention to the end-user experience. For an internship application, it demonstrates initiative, ownership over a complete delivery pipeline, and care for product details beyond the technical implementation itself.

@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'DeutschDeck - Flashcards de Alemao',
+        name: 'DeutschDeck - German Flashcards PWA',
         short_name: 'DeutschDeck',
-        description: 'Um PWA mobile-first para revisar vocabulario de alemao.',
+        description: 'A mobile-first PWA for reviewing German vocabulary with flashcards.',
         theme_color: '#0ea584',
         background_color: '#f3f7f4',
         display: 'standalone',
